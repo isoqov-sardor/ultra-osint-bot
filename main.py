@@ -263,7 +263,7 @@ def ism_buyruq(xabar):
         bot.reply_to(xabar, "❌ Ism familiya yozing!\nMisol: /name John Doe")
         return
     
-    xabar_id = bot.reply_to(xabar, f"🔍 Qidirilmoqda: {ism} {famiya}")
+    xabar_id = bot.reply_to(xabar, f"🔍 Qidirilmoqda: {ism} {familiya}")
     
     variantlar = [
         f"{ism}.{familiya}", f"{ism}{familiya}", f"{ism}_{familiya}",
