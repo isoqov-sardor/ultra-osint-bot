@@ -131,23 +131,31 @@ def tekshir(nom, url_shablon, username):
     return None
 
 # ============ BOT BUYRUQLARI ============
-
 @bot.message_handler(commands=['start'])
 def boshlash(xabar):
-    bot.reply_to(xabar, """
-<b>🔍 ULTRA-OSINT BOT</b>
+    bot.reply_to(xabar, "🤖 ULTRA-OSINT BOT ishga tushdi!\n📌 Buyruqlar uchun /menu ni bosing.")
 
-100+ platformada odam qidirish
-24/7 ishlaydi | Telefon orqali
+@bot.message_handler(commands=['username'])
+def username_buyruq(xabar):
+    # ... username qidiruv kodi ...
 
-📌 Buyruqlar uchun /menu tugmasini bosing
-    """)
+@bot.message_handler(commands=['email'])
+def email_buyruq(xabar):
+    # ... email qidiruv kodi ...
 
-# ... boshqa handlerlar (username, email, phone, name, full) ...
+@bot.message_handler(commands=['phone'])
+def telefon_buyruq(xabar):
+    # ... telefon qidiruv kodi ...
+
+@bot.message_handler(commands=['name'])
+def ism_buyruq(xabar):
+    # ... ism familiya qidiruv kodi ...
+
+@bot.message_handler(commands=['full'])
+def full_buyruq(xabar):
+    # ... to‘liq qidiruv kodi ...
 
 # === Yangi menyu handler ===
-from telebot import types
-
 @bot.message_handler(commands=['menu'])
 def menyu(xabar):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -195,5 +203,4 @@ while True:
         bot.infinity_polling(timeout=30)
     except Exception as x:
         print(f"❌ Xatolik: {x}")
-        print("🔄 5 soniyadan keyin qayta ulanadi...")
         time.sleep(5)
