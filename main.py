@@ -140,218 +140,48 @@ def boshlash(xabar):
 100+ platformada odam qidirish
 24/7 ishlaydi | Telefon orqali
 
-<b>📌 Buyruqlar:</b>
-/username <i>nick</i> - Username qidirish
-/email <i>@mail.com</i> - Email qidirish
-/name <i>Ism Fam</i> - Ism-familiya
-/phone <i>+998...</i> - Telefon qidirish
-/full <i>user email tel</i> - To'liq qidiruv
-
-<b>Misol:</b> /username alisher
+📌 Buyruqlar uchun /menu tugmasini bosing
     """)
 
-@bot.message_handler(commands=['username'])
-def username_buyruq(xabar):
-    try:
-        username = xabar.text.split(maxsplit=1)[1].strip()
-    except:
-        bot.reply_to(xabar, "❌ Username yozing!\nMisol: /username johndoe")
-        return
-    
-    xabar_id = bot.reply_to(xabar, f"🔍 Qidirilmoqda: @{username}...")
-    
-    natijalar = qidir(username)
-    
-    if natijalar:
-        matn = f"<b>✅ @{username} topildi! ({len(natijalar)} ta)</b>\n\n"
-        for i, (nom, url) in enumerate(natijalar[:20], 1):
-            matn += f"{i}. <b>{nom}</b>\n   {url}\n"
-        if len(natijalar) > 20:
-            matn += f"\n...va yana {len(natijalar)-20} ta platforma"
-    else:
-        matn = f"❌ @{username} uchun hech narsa topilmadi"
-    
-    try:
-        bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id, disable_web_page_preview=True)
-    except:
-        bot.send_message(xabar.chat.id, matn, disable_web_page_preview=True)
+# ... boshqa handlerlar (username, email, phone, name, full) ...
 
-@bot.message_handler(commands=['email'])
-def email_buyruq(xabar):
-    try:
-        email = xabar.text.split(maxsplit=1)[1].strip()
-    except:
-        bot.reply_to(xabar, "❌ Email yozing!\nMisol: /email john@gmail.com")
-        return
-    
-    if '@' not in email:
-        bot.reply_to(xabar, "❌ Noto'g'ri email formati!")
-        return
-    
-    xabar_id = bot.reply_to(xabar, f"🔍 Email tekshirilmoqda: {email}")
-    
-    username = email.split('@')[0]
-    matn = f"<b>📧 {email}</b>\n\n"
-    
-    # Gravatar tekshirish
-    hash_kod = hashlib.md5(email.lower().encode()).hexdigest()
-    try:
-        r = requests.get(f"https://www.gravatar.com/avatar/{hash_kod}?d=404", timeout=5)
-        if r.status_code == 200:
-            matn += f"🖼 Gravatar profili mavjud\n\n"
-    except:
-        pass
-    
-    matn += f"🔍 @{username} bo'yicha qidiruv:\n\n"
-    
-    try:
-        bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id)
-    except:
-        pass
-    
-    natijalar = qidir(username)
-    
-    if natijalar:
-        for nom, url in natijalar[:15]:
-            matn += f"• <b>{nom}</b>\n   {url}\n"
-        if len(natijalar) > 15:
-            matn += f"\n+{len(natijalar)-15} ta ko'proq"
-    else:
-        matn += "❌ Hech narsa topilmadi"
-    
-    try:
-        bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id, disable_web_page_preview=True)
-    except:
-        bot.send_message(xabar.chat.id, matn, disable_web_page_preview=True)
+# === Yangi menyu handler ===
+from telebot import types
 
-@bot.message_handler(commands=['phone'])
-def telefon_buyruq(xabar):
-    try:
-        telefon = xabar.text.split(maxsplit=1)[1].strip()
-    except:
-        bot.reply_to(xabar, "❌ Telefon yozing!\nMisol: /phone +998901234567")
-        return
-    
-    xabar_id = bot.reply_to(xabar, f"🔍 Tekshirilmoqda: {telefon}")
-    
-    toza = telefon.replace("+","").replace(" ","").replace("-","")
-    matn = f"<b>📱 {telefon}</b>\n\n"
-    
-    platformalar = {
-        "WhatsApp": f"https://wa.me/{toza}",
-        "Telegram": f"https://t.me/{toza}",
-        "Viber": f"https://viber.com/{toza}",
-        "Signal": f"https://signal.me/{toza}",
-    }
-    
-    for nom, url in platformalar.items():
-        try:
-            r = session.get(url, timeout=5)
-            if r.status_code == 200:
-                matn += f"✅ <b>{nom}</b>\n   {url}\n"
-        except:
-            pass
-    
-    bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id, disable_web_page_preview=True)
-
-@bot.message_handler(commands=['name'])
-def ism_buyruq(xabar):
-    try:
-        args = xabar.text.split(maxsplit=1)[1].strip().split()
-        ism, familiya = args[0], args[1]
-    except:
-        bot.reply_to(xabar, "❌ Ism familiya yozing!\nMisol: /name John Doe")
-        return
-    
-    xabar_id = bot.reply_to(xabar, f"🔍 Qidirilmoqda: {ism} {familiya}")
-    
-    variantlar = [
-        f"{ism}.{familiya}", f"{ism}{familiya}", f"{ism}_{familiya}",
-        f"{ism}{familiya[0]}", f"{ism[0]}{familiya}", f"{familiya}.{ism}",
-        f"{familiya}{ism}", ism.lower(), familiya.lower(),
-        f"{ism.lower()}.{familiya.lower()}",
-        f"{ism.lower()}{familiya.lower()}"
-    ]
-    
-    barchasi = {}
-    for v in variantlar:
-        natijalar = qidir(v.lower())
-        for nom, url in natijalar:
-            if nom not in barchasi:
-                barchasi[nom] = url
-    
-    matn = f"<b>👤 {ism} {familiya}</b>\n<b>✅ {len(barchasi)} ta profil</b>\n\n"
-    
-    for nom, url in list(barchasi.items())[:15]:
-        matn += f"• <b>{nom}</b>\n   {url}\n"
-    
-    if len(barchasi) > 15:
-        matn += f"\n+{len(barchasi)-15} ta ko'proq"
-    
-    if not barchasi:
-        matn = f"❌ {ism} {familiya} topilmadi"
-    
-    try:
-        bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id, disable_web_page_preview=True)
-    except:
-        bot.send_message(xabar.chat.id, matn, disable_web_page_preview=True)
-
-@bot.message_handler(commands=['full'])
-def full_buyruq(xabar):
-    try:
-        qismlar = xabar.text.split(maxsplit=1)[1].strip().split()
-        username, email, telefon = qismlar[0], qismlar[1], qismlar[2]
-    except:
-        bot.reply_to(xabar, "❌ Format: /full username email telefon\nMisol: /full johndoe john@gmail.com +998901234567")
-        return
-    
-    xabar_id = bot.reply_to(xabar, "🔍 TO'LIQ QIDIRUV BOSHLANDI...\nBu bir necha daqiqa olishi mumkin")
-    
-    u_natija = qidir(username)
-    
-    email_user = email.split('@')[0]
-    e_natija = qidir(email_user)
-    
-    toza = telefon.replace("+","").replace(" ","").replace("-","")
-    p_natija = []
-    for nom, url in {"WhatsApp": f"https://wa.me/{toza}", "Telegram": f"https://t.me/{toza}"}.items():
-        try:
-            r = session.get(url, timeout=5)
-            if r.status_code == 200:
-                p_natija.append((nom, url))
-        except:
-            pass
-    
-    barcha = {}
-    for n, u in u_natija + e_natija:
-        barcha[n] = u
-    
-    matn = f"<b>🔍 TO'LIQ QIDIRUV YAKUNLANDI</b>\n\n"
-    matn += f"👤 @{username}: <b>{len(u_natija)} ta</b>\n"
-    matn += f"📧 {email}: <b>{len(e_natija)} ta</b>\n"
-    matn += f"📱 {telefon}: <b>{len(p_natija)} ta</b>\n"
-    matn += f"\n📊 Jami: <b>{len(barcha)} ta noyob profil</b>\n\n"
-    
-    for nom, url in list(barcha.items())[:15]:
-        matn += f"• <b>{nom}</b>\n   {url}\n"
-    
-    if len(barcha) > 15:
-        matn += f"\n+{len(barcha)-15} ta ko'proq"
-    
-    try:
-        bot.edit_message_text(matn, xabar.chat.id, xabar_id.message_id, disable_web_page_preview=True)
-    except:
-        bot.send_message(xabar.chat.id, matn, disable_web_page_preview=True)
+@bot.message_handler(commands=['menu'])
+def menyu(xabar):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    knopka1 = types.KeyboardButton("🔍 Username")
+    knopka2 = types.KeyboardButton("📧 Email")
+    knopka3 = types.KeyboardButton("📱 Telefon")
+    knopka4 = types.KeyboardButton("👤 Ism-Familiya")
+    knopka5 = types.KeyboardButton("🧩 To‘liq qidiruv")
+    knopka6 = types.KeyboardButton("ℹ️ Yordam")
+    markup.add(knopka1, knopka2, knopka3, knopka4, knopka5, knopka6)
+    bot.send_message(xabar.chat.id, "📌 Qidiruv turini tanlang:", reply_markup=markup)
 
 @bot.message_handler(func=lambda m: True)
-def avto_qidir(xabar):
-    """Har qanday matnni avtomatik qidirish"""
+def tugma_handler(xabar):
     matn = xabar.text.strip()
-    
-    if '@' in matn and '.' in matn:
-        email_buyruq(xabar)
-    elif matn.startswith('+'):
-        telefon_buyruq(xabar)
+    if matn == "🔍 Username":
+        bot.reply_to(xabar, "✍️ Username yozing: /username johndoe")
+    elif matn == "📧 Email":
+        bot.reply_to(xabar, "✍️ Email yozing: /email test@gmail.com")
+    elif matn == "📱 Telefon":
+        bot.reply_to(xabar, "✍️ Telefon yozing: /phone +998901234567")
+    elif matn == "👤 Ism-Familiya":
+        bot.reply_to(xabar, "✍️ Ism familiya yozing: /name John Doe")
+    elif matn == "🧩 To‘liq qidiruv":
+        bot.reply_to(xabar, "✍️ Format: /full username email telefon")
+    elif matn == "ℹ️ Yordam":
+        bot.reply_to(xabar, """
+📖 Yordam menyusi:
+/username johndoe – Username qidirish
+/email test@gmail.com – Email qidirish
+/phone +998901234567 – Telefon qidirish
+/name John Doe – Ism-Familiya qidirish
+/full johndoe test@gmail.com +998901234567 – To‘liq qidiruv
+        """)
     else:
         username_buyruq(xabar)
 
