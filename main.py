@@ -105,6 +105,64 @@ session = requests.Session()
 session.headers.update({'User-Agent': 'Mozilla/5.0'})
 
 def create_menu_keyboard():
+    # ============ MENU BUTTON (Telegram bot menyusi) ============
+from telebot.types import BotCommand
+
+def set_menu_buttons():
+    """Telegram bot menyusiga tugmalarni o'rnatish"""
+    commands = [
+        BotCommand("start", "🚀 Botni ishga tushirish"),
+        BotCommand("menu", "📋 Asosiy menyuni ochish"),
+        BotCommand("username", "🔍 Username orqali qidirish"),
+        BotCommand("email", "📧 Email orqali qidirish"),
+        BotCommand("phone", "📱 Telefon orqali qidirish"),
+        BotCommand("name", "👤 Ism familiya orqali qidirish"),
+        BotCommand("full", "🔎 To'liq qidiruv (user+email+tel)"),
+        BotCommand("tgid", "🆔 Telegram ID yoki @username"),
+        BotCommand("forward", "📡 Forward xabarni tahlil qilish"),
+        BotCommand("help", "❓ Yordam"),
+    ]
+    
+    try:
+        bot.set_my_commands(commands)
+        print("✅ Menu tugmalari o'rnatildi!")
+        return True
+    except Exception as e:
+        print(f"❌ Menu tugmalarini o'rnatishda xatolik: {e}")
+        return False
+
+# ============ HELP BUYRUQ ============
+@bot.message_handler(commands=['help'])
+def help_buyruq(xabar):
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton("🔙 Orqaga", callback_data="menu_back"))
+    bot.reply_to(xabar, """
+<b>🤖 ULTRA-OSINT BOT - YORDAM</b>
+
+<b>🔍 Username qidirish:</b>
+• /username <i>nick</i> - 100+ platformada qidirish
+• /tgid @<i>username</i> - Telegram profili
+
+<b>📧 Email qidirish:</b>
+• /email <i>user@mail.com</i> - Email orqali
+
+<b>📱 Telefon qidirish:</b>
+• /phone <i>+998901234567</i> - Telefon orqali
+
+<b>👤 Ism-Familiya:</b>
+• /name <i>Ism Fam</i> - Ism familiya
+
+<b>📡 Forward tahlil:</b>
+• Xabarni botga forward qiling
+
+<b>🔎 To'liq qidiruv:</b>
+• /full <i>user email tel</i>
+
+⚡ Bot 85+ platformani bir vaqtda tekshiradi
+    """, reply_markup=keyboard)
+
+# Menu tugmalarini o'rnatish
+set_menu_buttons()
     """Asosiy menyu tugmalari"""
     keyboard = InlineKeyboardMarkup(row_width=2)
     btn1 = InlineKeyboardButton("🔍 Username", callback_data="menu_username")
